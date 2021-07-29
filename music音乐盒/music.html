@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>音乐盒</title>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome/css/font-awesome.min.css">
+	<!-- <script src="https://cdn.jsdelivr.net/gh/stevenjoezhang/live2d-widget@latest/autoload.js"></script> -->
+	<!-- <link rel="stylesheet" href="./css/font-awesome.min.css"> -->
+	<script src="../live2d-widget/autoload.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css"/>
+	<!-- <link rel="stylesheet" type="text/css" href="./css/index1.css"/> -->
+    <link rel="stylesheet" type="text/css" href="./css/index.css" />
+	<link rel="stylesheet" type="text/css" href="./css/main.css" />
+  </head>
+  <body>
+	  <div class='zo' >	
+		<div class='tou'>
+			<div class='tou-tou' onClick="cl4()"> <img src="../img/xiao.png" with="60px" height="60px"/></a> </div>
+			<div class='tou-li'>
+				<a href="../index.html"><div class='box-menu' id='bo'> <img src="../img/tubiao.PNG"/> <font size="2" face="Verdana" color="#555555"> Me </font> </div></a> 
+				<a href="../others/liuyan.html"><div class='box-menu' > <img src="../img/tubiao.PNG"/> <font size="2" face="Verdana" color="#555555"> 留言 </font> </div></a>
+				<a href="../others/photo.html"><div class='box-menu' > <img src="../img/tubiao.PNG"/> <font size="2" face="Verdana" color="#555555"> 相册 </font> </div></a>
+				<a href="../music音乐盒/music.html"><div class='box-menu' style="background-color:#C39AAD;"> <img src="../img/tubiao.PNG"/> <font size="2" face="Verdana" color="#555555"> 音乐盒 </font> </div></a>
+				<a href=""><div class='box-menu'> <img src="../img/tubiao.PNG"/> <font size="2" face="Verdana" color="#555555"> 首页 </font> </div> </a> 
+				<a href="../login.html"><div class='box-menu'> <img src="../img/tubiao.PNG"/> <font size="2" face="Verdana" color="#555555"> 退出 </font> </div></a> 
+				<a href="../others/about.html"><div class='box-menu' > <img src="../img/tubiao.PNG"/> <font size="2" face="Verdana" color="#555555"> 关于 </font> </div> </a> 
+			</div>
+		</div>
+	  
+	<div id="app">
+		<template>
+			<div class="main-page">
+				<audio :src="songInfo.url" id="audio"></audio>
+				<div class="background-flitter" :style="`background-image: url(${songInfo.cover});background-size: 100%`"></div>
+				<div class="play-mini">
+					<div class="progress-bar" @click="HandleProgressClick" ref="track">
+						<div class="progress-box" :style="{ width: audioProgressPercent }">
+							<div class="play-point" :style="{ transform: 'translateX(' + thumbTranslateX + 'px)' }">
+								<img src="./img/dot_01.png" alt="" />
+							</div>
+						</div>
+					</div>
+					<div class="songInfo">
+						<img class="poster" :src="songInfo.cover" alt="" />
+						<div class="info">
+							<div class="text-info" style="font-weight: 600">
+								{{ songInfo.name }}
+							</div>
+							<div class="text-info" style="font-size: 14px">
+								{{ songInfo.artistsName }}
+							</div>
+						</div>
+					</div>
+					<div class="controls">
+						<img @click="SkipBack" src="./img/arrow_01.png" alt="" />
+						<img @click="PlayMusic" class="status" v-show="!playing" src="./img/play_icon.png" alt=""/>
+						<img class="status" @click="PlayMusic" v-show="playing"  src="./img/play-02.png"  alt=""/>
+						<img @click="SkipForward" src="./img/arrow_02.png" alt="" />
+					</div>
+					<div class="right-botton">
+						<div class="text-div">音量</div>
+						<el-slider style="width: 80px" @input="ChangeVolum" v-model="volume"></el-slider>
+						<div class="text-div"></div>
+						<el-dropdown @command="SetPlaySequence">
+							<a href="javascript:void(0)" style="text-decoration: none">
+								  {{ showPlayType }}
+								  <i class="el-icon-s-order"></i>
+							</a>
+							<el-dropdown-menu slot="dropdown">
+								  <el-dropdown-item command="1">列表循环</el-dropdown-item>
+								  <el-dropdown-item command="2">随机播放</el-dropdown-item>
+								  <el-dropdown-item command="3">单曲循环</el-dropdown-item>
+							</el-dropdown-menu>
+						</el-dropdown>
+						<div class="text-div">播放列表</div>
+						<a href="javascript:;">
+							<i class="el-icon-s-unfold"  @click="drawer = true"  size="36"  type="ios-list"></i>
+						</a>
+						<div class="text-div"></div>
+						<!-- <el-button type="primary" @click="ClearList">清除</el-button> -->
+					</div>
+				</div>
+				<div class="song-cover-lyric">
+					<div class="disc-continer">
+						<div class="poster" ref="rotate">
+							<img :src="songInfo.cover" alt="" />
+						</div>
+						<div class="song-name">{{ songInfo.name }}</div>
+						<div class="song-artistsName">{{ songInfo.artistsName }}</div>
+					</div>
+					<div class="lyric">
+						<div ref="musicLyric" class="music-lyric" :style="{ 'padding-top': paddingTop }">
+							<div class="music-lyric-items" :style="lyricTop">
+								<template v-if="lyricInfo.length > 0">
+									<p  v-for="(item, index) in lyricInfo"  :key="index"  :data-index="index"  ref="lyric"  :style="{color: lyricIndex === index ? colorLight : color,'font-size': fontSize,}">
+										{{ item.lyric }}
+									</p>
+								</template>
+								<p style="color: #fff;" v-else>文案加载失败！</p>
+							</div>
+						</div>
+					</div>
+				</div>
+				<el-drawer title="播放列表" placement="left" width="320" :visible.sync="drawer">
+					<div class="list-container">
+						<div  class="songInfo"  v-for="(item, index) in songList"  :key="index"  @click="PlayListMusic(index)"  >
+							<img :src="item.cover" alt="" />
+							<div class="info">
+								<div class="name">{{ item.name }}</div>
+								<div class="singer">{{ item.artistsName }}</div>
+							</div>
+						</div>
+					</div>
+				</el-drawer>
+			</div>
+		</template>
+    </div>
+  </body>
+</html>
+
+<style>
+	  html,
+	  body {
+		margin: 0;
+		width: 100%;
+		height: 100%;
+	  }
+	  #app {
+		width: 100%;
+		height: 100%;
+	  }
+</style>
+<script src="../js/chickback.js"></script> 
+<script type="text/javascript" color="208,55,66" opacity="0.5"count="99"src="../js/xt.js"></script>
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+<!-- <script src="./js/vue.js"></script> -->
+<!-- <script src="./js/index.js"></script> -->
+<!-- <script src="./js/axios.min.js"></script> -->
+
+<script>
+  new Vue({
+    el: "#app",
+    data: function () {
+      return {
+        playing: false,
+        drawer: false,
+        playIndex: 0,
+        songInfo: {},
+        songList: [
+          {
+            albumId: 122397809,
+            albumTitle: "一些古风歌【2021】",
+            artistsName: "平生不晚",
+            cover:
+              "https://p2.music.126.net/pOR45DW9BfLSQ2JDJJeUgQ==/109951165714496390.jpg",
+            id: 1820643403,
+            name: "伯虎说（纯戏腔段）",
+            url: "https://music.163.com/song/media/outer/url?id=1820643403.mp3",
+          },
+          {
+            albumId: 75612550,
+            albumTitle: "辞.九门回忆",
+            artistsName: "解忧草/冰幽",
+            cover:
+              "https://p1.music.126.net/pWJXXU4kbhsk1HhXCPUMag==/109951163879149420.jpg",
+            id: 557640761,
+            name: "辞.九门回忆",
+            url: "https://music.163.com/song/media/outer/url?id=1347524822.mp3",
+          },
+          {
+            albumId: 75612550,
+            albumTitle: "20岁30岁40岁",
+            artistsName: "曾婕Joey.Z",
+            cover:
+              "https://p2.music.126.net/-HrOFDdHaCg-_bl6MlqFQw==/109951163753269739.jpg?param=120y120",
+            id: 1335968312,
+            name: "20岁30岁40岁",
+            url: "https://music.163.com/song/media/outer/url?id=1335968312.mp3",
+          },
+          {
+            albumId: 35172219,
+            albumTitle: "君の名は - 黄昏之时",
+            artistsName: "Frank_Jiang",
+            cover:
+              "https://p1.music.126.net/YppJiMHyrLc7tDkj6jUttg==/109951162858188597.jpg",
+            id: 459116892,
+            name: "黄昏之时（FRANKOWO Bootleg）",
+            url: "https://music.163.com/song/media/outer/url?id=459116892.mp3",
+          },
+          {
+            albumId: 85474719,
+            albumTitle: "等什么君翻唱合集",
+            artistsName: "等什么君",
+            cover:
+              "https://p1.music.126.net/dDF57j70YTq6isZTIqQNWg==/109951164678301220.jpg",
+            id: 1421028283,
+            name: "冬眠（翻自 司南） ",
+            url: "https://music.163.com/song/media/outer/url?id=1421028283.mp3",
+          },
+          {
+            albumId: 85474719,
+            albumTitle: "安河桥北",
+            artistsName: "橙大蕾蕾",
+            cover:
+              "https://p1.music.126.net/vsZdtsTsypKNQ4aPGvpCSA==/109951162818399451.jpg?param=120y120",
+            id: 445154044,
+            name: "安和桥",
+            url: "https://music.163.com/song/media/outer/url?id=445154044.mp3",
+          },
+          {
+            albumId: 81176861,
+            albumTitle: "自定义",
+            artistsName: "于果",
+            cover:
+              "https://p2.music.126.net/FWR6RWtqhljoKR0QyRhQzQ==/109951163127272432.jpg",
+            id: 1479515580,
+            name: "侧脸(DJ)",
+            url: "https://music.163.com/song/media/outer/url?id=1479515580.mp3",
+          },
+          {
+            albumId: 85474719,
+            albumTitle: "冬眠",
+            artistsName: "司南",
+            cover:
+              "https://p1.music.126.net/4KDBaQXnQywQovmqvjx-8Q==/109951164444131697.jpg?param=400y400",
+            id: 1398663411,
+            name: "冬眠",
+            url: "https://music.163.com/song/media/outer/url?id=1398663411.mp3",
+          },
+          {
+            albumId: 95455188,
+            albumTitle: "虞兮叹",
+            artistsName: "闻人听書_",
+            cover:
+              "https://p1.music.126.net/6gdwWjPXUkyTx4CuuSxkIg==/109951165319864977.jpg",
+            id: 1479526505,
+            name: "虞兮叹",
+            url: "https://music.163.com/song/media/outer/url?id=1479526505.mp3",
+          },
+          {
+            albumId: 121076375,
+            albumTitle: "错位时空",
+            artistsName: "艾辰",
+            cover:
+              "https://p1.music.126.net/8C0lwLE88j9ZwLyPQ9a4FA==/109951165595770076.jpg",
+            id: 1808492017,
+            name: "错位时空",
+            url: "https://music.163.com/song/media/outer/url?id=1808492017.mp3",
+          },
+          {
+            albumId: 120919402,
+            albumTitle: "四季予你",
+            artistsName: "程响",
+            cover:
+              "https://p2.music.126.net/k5r1GC-erKK4WcDmzyrsIw==/109951165648878421.jpg",
+            id: 1807537867,
+            name: "四季予你",
+            url: "https://music.163.com/song/media/outer/url?id=1807537867.mp3",
+          },
+          {
+            albumId: 85474719,
+            albumTitle: "认了吧",
+            artistsName: "陈奕迅",
+            cover:
+              "https://p1.music.126.net/o_OjL_NZNoeog9fIjBXAyw==/18782957139233959.jpg?param=400y400",
+            id: 65538,
+            name: "好久不见",
+            url: "https://music.163.com/song/media/outer/url?id=65538.mp3",
+          },
+          {
+            albumId: 85474719,
+            albumTitle: "苏东坡",
+            artistsName: "司南",
+            cover:
+              "https://p2.music.126.net/4xgUVosD5hCOe1QETKACJQ==/109951164385891327.jpg?param=400y400",
+            id: 1393189946,
+            name: "苏东坡",
+            url: "https://music.163.com/song/media/outer/url?id=1393189946.mp3",
+          },
+          {
+            albumId: 85474719,
+            albumTitle: "Dancin",
+            artistsName: "Aaron Smith/Luvli/Krono",
+            cover:
+              "https://p1.music.126.net/0VY_IeJo5ACPDhTWilamuw==/18610333812708197.jpg?param=400y400",
+            id: 439121233,
+            name: "Dancin (Krono Remix)",
+            url: "https://music.163.com/song/media/outer/url?id=439121233.mp3",
+          },
+          {
+            albumId: 85474719,
+            albumTitle: "没有发生的爱情",
+            artistsName: "任然",
+            cover:
+              "https://p1.music.126.net/mIUtHBPTJ52H78_FhHzcWg==/19188676928210304.jpg?param=400y400",
+            id: 493735012,
+            name: "无人之岛",
+            url: "https://music.163.com/song/media/outer/url?id=493735012.mp3",
+          },
+          {
+            albumId: 93162249,
+            albumTitle: "STRAY SHEEP",
+            artistsName: "米津玄師",
+            cover:
+              "https://p1.music.126.net/6mhlWCOOQkT0xDjjuCLW7g==/109951165181187586.jpg",
+            id: 1466598056,
+            name: "Lemon",
+            url: "https://music.163.com/song/media/outer/url?id=1466598056.mp3",
+          },
+        ],
+        volume: 80, // 音量
+        lyricInfo: [],
+        playType: 1, // 播放类型：1-列表循环，2-随机播放，3-单曲循环
+        showPlayType: "列表循环",
+        audioProgress: 0,
+        thumbTranslateX: 0,
+        lyricIndex: 0,
+        color: "#fff", //文案默认颜色
+        colorLight: "#40ce8f", //文案高亮色
+        fontSize: "16px", //文案字体大小
+        lineHeight: "42", //每段行高
+        paddingTop: "300px", //高亮文案部分居中
+      };
+    },
+    created() {
+      console.log("Vue生命周期");
+    },
+    computed: {
+      audioProgressPercent() {
+        return `${this.audioProgress * 100}%`;
+      },
+      lyricTop() {
+        console.log("transform")
+        return `transform :translate3d(0, ${
+          (0 - this.lineHeight) * (this.lyricIndex - -1)
+        }px, 0);color: ${this.color};line-height: ${this.lineHeight}px`;
+      },
+    },
+    mounted() {
+      const audio = document.getElementById("audio");
+      this.Init();
+    },
+    methods: {
+      Init() {
+        this.GetSongListInfo();
+      },
+      GetSongListInfo(res) {
+        this.songInfo = this.songList[0];
+        this.AudioInit();
+        this.GetLyric(this.songInfo.id);
+      },
+      //播放与暂停
+      PlayMusic() {
+        if (this.playing) {
+          // 播放中,点击则为暂停
+          this.playing = false;
+          this.$refs.rotate.style.animationPlayState = "paused";
+          audio.pause();
+        } else {
+          // 暂停中,点击则为播放
+          this.playing = true;
+          this.$refs.rotate.style.animationPlayState = "running";
+          audio.play();
+        }
+      },
+      AudioInit() {
+        let that = this;
+        let progressL = this.$refs.track.offsetWidth; // 进度条总长
+        // 音频或视频文件已经就绪可以开始，在点击播放时触发
+        audio.addEventListener("canplay", () => {
+          console.log("canplay");
+        });
+        audio.addEventListener("timeupdate", () => {
+          // 当前播放时间
+          let compareTime = audio.currentTime;
+          for (let i = 0; i < that.lyricInfo.length; i++) {
+            if (compareTime > parseInt(that.lyricInfo[i].time)) {
+              const index = that.lyricInfo[i].index;
+              if (i === parseInt(index)) {
+                that.lyricIndex = i;
+              }
+            }
+          }
+          that.currentTime = this.TimeToString(audio.currentTime);
+          that.audioProgress = audio.currentTime / audio.duration;
+          that.thumbTranslateX = (that.audioProgress * progressL).toFixed(3);
+        });
+        audio.addEventListener("ended", () => {
+          switch (parseInt(that.playType)) {
+            case 1: // 列表循环
+              that.playIndex =
+                that.playIndex + 1 >= that.songList.length
+                  ? 0
+                  : that.playIndex + 1;
+              break;
+            case 2: // 随机播放
+              that.playIndex = Math.floor(Math.random() * that.songList.length);
+              break;
+            case 3: // 单曲循环
+              break;
+          }
+          that.songInfo = that.songList[that.playIndex];
+          this.GetLyric(that.songInfo.id);
+          setTimeout(() => {
+            this.$refs.rotate.style.animationPlayState = "running";
+            audio.play();
+          }, 100);
+        });
+      },
+      // 调节音量
+      ChangeVolum(c) {
+        audio.volume = c / 100;
+      },
+      //
+      SetPlaySequence(val) {
+        console.log(val);
+        this.playType = val;
+        if (val == 1) {
+          this.showPlayType = "列表循环";
+        } else if (val == 2) {
+          this.showPlayType = "随机播放";
+        } else if (val == 3) {
+          this.showPlayType = "单曲循环";
+        }
+      },
+      PlayListMusic(index) {
+        this.playIndex = index;
+        this.songInfo = this.songList[this.playIndex];
+        this.GetLyric(this.songInfo.id);
+        this.playing = true;
+        this.drawer = false;
+        setTimeout(() => {
+          this.$refs.rotate.style.animationPlayState = "running";
+          audio.play();
+        }, 100);
+      },
+      //点击进度条
+      HandleProgressClick(event) {
+        let progressL = this.$refs.track.offsetWidth; // 进度条总长
+        let clickX = event.offsetX;
+        let time = (clickX / progressL).toFixed(2);
+        this.SetProgress(time);
+      },
+      SetProgress(x) {
+        audio.currentTime = audio.duration * x;
+      },
+      // 上一首
+      SkipBack() {
+        this.SkipFn("skipBack");
+      },
+      // 下一首
+      SkipForward() {
+        this.SkipFn("skipForward");
+      },
+      //上下首封装
+      SkipFn(type) {
+        switch (parseInt(this.playType)) {
+          case 2: // 随机播放
+            this.playIndex = Math.floor(Math.random() * this.songList.length);
+            break;
+          default:
+            if (type == "skipBack") {
+              this.playIndex - 1 >= 0 ? this.playIndex-- : 0;
+            } else {
+              this.playIndex =
+                this.playIndex + 1 >= this.songList.length
+                  ? this.songList.length - 1
+                  : this.playIndex + 1;
+            }
+            break;
+        }
+        this.songInfo = this.songList[this.playIndex];
+        this.GetLyric(this.songInfo.id);
+        this.playing = true;
+        setTimeout(() => {
+          this.$refs.rotate.style.animationPlayState = "running";
+          audio.play();
+        }, 100);
+      },
+      GetLyric(id) {
+        let that = this;
+        axios
+          .get("https://api.mtnhao.com/lyric", {
+            params: {
+              id: id,
+            },
+          })
+          .then(function (response) {
+            let lrc = response.data.lrc.lyric;
+            that.GetLyricList(lrc);
+          });
+        //
+      },
+      GetLyricList(lrc) {
+        let lyricsObjArr = [];
+        const regNewLine = /\n/;
+        const lineArr = lrc.split(regNewLine); // 每行歌词的数组
+        const regTime = /\[\d{2}:\d{2}.\d{2,3}\]/;
+        lineArr.forEach((item) => {
+          if (item === "") return;
+          const obj = {};
+          const time = item.match(regTime);
+
+          obj.lyric =
+            item.split("]")[1].trim() === "" ? "" : item.split("]")[1].trim();
+          obj.time = time
+            ? this.TimeToSeconds(time[0].slice(1, time[0].length - 1))
+            : 0;
+          obj.uid = Math.random().toString().slice(-6);
+          if (obj.lyric === "") {
+            console.log("这一行没有歌词");
+          } else {
+            lyricsObjArr.push(obj);
+          }
+        });
+        this.lyricInfo = lyricsObjArr.map((item, index) => {
+          item.index = index;
+          return {
+            ...item,
+          };
+        });
+      },
+      TimeToString(seconds) {
+        let param = parseInt(seconds);
+        let hh = "",
+          mm = "",
+          ss = "";
+        if (param >= 0 && param < 60) {
+          param < 10 ? (ss = "0" + param) : (ss = param);
+          return "00:" + ss;
+        } else if (param >= 60 && param < 3600) {
+          mm = parseInt(param / 60);
+          mm < 10 ? (mm = "0" + mm) : mm;
+          param - parseInt(mm * 60) < 10
+            ? (ss = "0" + String(param - parseInt(mm * 60)))
+            : (ss = param - parseInt(mm * 60));
+          return mm + ":" + ss;
+        }
+      },
+      TimeToSeconds(time) {
+        // 格式化歌词的时间 转换成 sss:ms
+        const regMin = /.*:/;
+        const regSec = /:.*\./;
+        const regMs = /\./;
+
+        const min = parseInt(time.match(regMin)[0].slice(0, 2));
+        let sec = parseInt(time.match(regSec)[0].slice(1, 3));
+        const ms = time.slice(
+          time.match(regMs).index + 1,
+          time.match(regMs).index + 3
+        );
+        if (min !== 0) {
+          sec += min * 60;
+        }
+        return Number(sec + "." + ms);
+      },
+    },
+  });
+</script>

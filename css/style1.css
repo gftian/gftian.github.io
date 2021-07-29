@@ -1,0 +1,109 @@
+body{
+	margin: 0;
+	padding: 0;
+	/* background: #34495e; */
+}
+
+/*设置显示图片的大小，溢出隐藏*/
+.slidershow{
+	width: 700px;
+	height: 500px;
+	overflow: hidden;
+}
+
+
+/*居中*/
+.middle{
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%,-50%);/*实现块元素百分比下居中*/
+}
+
+/*导航   设置绝对位置，弹性布局，按钮位置*/
+.navigation{
+	position: absolute;
+	bottom: 20px;/*底部距离*/
+	left: 50%;
+	transform: translateX(-50%);
+	display: flex;
+}
+
+/*设置按钮属性*/
+.bar{
+	width: 50px;
+	height: 10px;
+	border: 2px solid #fff;
+	margin: 5px;
+	cursor: pointer;
+	transition: 0.4s;
+}
+
+.bar:hover{
+	background: #fff;
+}
+
+
+/*隐藏了按钮*/
+input[name="r"]{
+	position: absolute;
+	visibility: hidden;
+}
+
+.slides{
+	width: 1000%;
+	height: 100%;
+	display: flex;
+}
+
+.sile{
+	width: 20%;
+	transition: 0.6s;/*delay(延迟)*/
+}
+
+.slide img{
+/* 	width: 100%;
+	height: 100%; */
+	width: 700px;
+	height: 500px;
+}
+
+/*绑定按钮*/
+#r1:checked ~ .s1{
+	margin-left: 0%;
+}
+
+#r2:checked ~ .s1{
+	margin-left: -10%;
+}
+
+#r3:checked ~ .s1{
+	margin-left: -20%;
+}
+
+#r4:checked ~ .s1{
+	margin-left: -30%;
+}
+
+#r5:checked ~ .s1{
+	margin-left: -40%;
+}
+#r6:checked ~ .s1{
+	margin-left: -50%;
+}
+
+#r7:checked ~ .s1{
+	margin-left: -60%;
+}
+
+#r8:checked ~ .s1{
+	margin-left: -70%;
+}
+
+#r9:checked ~ .s1{
+	margin-left: -80%;
+}
+
+#r10:checked ~ .s1{
+	margin-left: -90%;
+}

@@ -1,0 +1,188 @@
+/* CSS Document */
+
+*{margin:0; padding:0;}
+body{ 
+   font-size:15px;   
+   background:url(../img/1.jpg);
+   background-attachment:fixed;
+
+}
+p{color:#666;font:16px "Microsoft YaHei", Arial, Helvetica, sans-serif;line-height: normal;line-height: 1.5;}
+li{ list-style:none;}
+img{border:none; vertical-align:top;}
+a{text-decoration:none; color:inherit;}
+.clear:after{content:""; display:block; clear:both;}
+video{height:360px;width:480px;autoplay:true;}
+.zo{
+	overflow:hidden;
+    
+}
+.tou{
+   float:left;
+   overflow: hidden;
+   height:1000px;
+   width:100px;
+   position:fixed;
+   background: linear-gradient(90deg,#d0d0d0,#c36371,#f9f9f9,#d0d0d0);
+   background-size:1400% 300%;
+   animation:mymove 10s ease infinite;
+   -webkit-animation: mymove 10s ease infinite;
+   -moz-animation: mymove 10s ease infinite;
+  
+  
+}
+.tou-li{ 
+   padding:15px;
+   height:800px;
+   width:70px;
+   margin:auto;
+   margin-top: 35px; 
+}
+.box-menu{
+	width:auto;
+	margin-top:15px;
+	
+	
+}
+.tou-tou{
+	padding:50px 20px 20px 15px;
+	width:auto;
+}
+.box-menu:hover {
+	background-color:#C39AAD;
+}
+.about{
+	  float:right;
+      width:600px; 
+	  margin-top:90px;
+	  margin-right:400px;
+	  background-color:rgba(255,255,255,0.15)<!--最后一个参数设置透明度，前面三个是RGB颜色值--> 
+	  
+}
+a{text-decoration:none}
+.tu{float:left; position:fixed;margin-left:110px;margin-top:20px;}
+@keyframes mymove
+	{
+		    0% {
+			background-position: 0% 0%; }
+					
+			50% {
+			background-position: 50% 100%; }
+			
+			100% {
+			 background-position: 100% 0%; }
+	}
+	
+	
+	
+			body{
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				min-height: 100vh;
+			}
+			.container{
+				width: 80%;
+				padding: 20px;
+			}
+			.container h2{
+				width: 100%;
+				color: #45f3ff;
+				font-size: 36px;
+				text-align: center;
+				margin-bottom: 10px;
+			}
+			.container .row100{
+				position: relative;
+				width: 100%;
+				display: grid;
+				grid-template-columns: repeat(auto-fit,minmax(300px,1fr));
+			}
+			.container .row100 .col{
+				position: relative;
+				width: 100%;
+				padding: 0 10px;
+				margin: 30px 0 10px;
+				transition: 0.5s;
+			}
+			.container .row100 .inputBox{
+				position: relative;
+				width: 100%;
+				height: 40px;
+				color: #45F3FF;
+			}
+			.container .row100 .inputBox input,
+			.container .row100 .inputBox.textarea textarea{
+				position: absolute;
+				width: 100%;
+				height: 100%;
+				background: transparent;
+				box-shadow: none;
+				border: none;
+				outline: none;
+				font-size: 18px;
+				padding: 0 10px;
+				z-index: 1;
+				color: #000;
+			}
+			.container .row100 .inputBox .text{
+				position: absolute;
+				top: 0;
+				left: 0;
+				line-height: 40px;
+				font-size: 18px;
+				padding: 0 10px;
+				display: block;
+				transition: 0.5s;
+				pointer-events: none;
+			}
+			.container .row100 .inputBox input:focus + .text,
+			.container .row100 .inputBox input:valid + .text{
+				top: -35px;
+				left: -10px;
+			}
+			.container .row100 .inputBox .line{
+				position: absolute;
+				bottom: 0;
+				display: block;
+				width: 100%;
+				height: 2px;	
+				background: #45F3FF;
+				transition: 0.5s;
+				border-radius: 2px;
+				pointer-events: none;
+			}
+			.container .row100 .inputBox input:focus ~ .line,
+			.container .row100 .inputBox input:valid ~ .line{
+				height: 100%;
+			}
+			.container .row100 .inputBox.textarea{
+				position: relative;
+				width: 100%;
+				height: 100px;
+				padding: 10px 0;
+			}
+			.container .row100 .inputBox.textarea textarea{
+				height: 100%;
+				resize: none;
+			}
+			.container .row100 .inputBox textarea:focus + .text,
+			.container .row100 .inputBox textarea:valid + .text{
+				top: -35%;
+				left: -10px;f
+			} 
+			.container .row100 .inputBox textarea:focus ~ .line,
+			.container .row100 .inputBox textarea:valid ~ .line{
+				height: 100%;
+			} 
+			
+			input[type="submit"]{
+				border: none;
+				padding: 7px 35px;
+				cursor: pointer;
+				outline: none;
+				background: #45F3FF;
+				color: #000;
+				font-size: 18px;
+				border-radius: 2px;
+			}
